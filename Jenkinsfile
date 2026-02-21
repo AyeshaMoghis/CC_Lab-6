@@ -15,13 +15,15 @@ pipeline {
                 sh 'docker run -d --name backend2 --network app-network backend-app'
             }
         }
-        stage('Deploy NGINX Load Balancer') {
-            steps {
-                sh 'docker rm -f nginx-lb || true'
-                sh 'docker run -d --name nginx-lb --network app-network -p 80:80 -v $(pwd)/default.conf:/etc/nginx/conf.d/default.conf nginx'
-            }
-        }
+stage('Deploy NGINX Load Balancer') {
+    steps {
+        sh 'docker rm -f nginx-lb || true'
+        sh 'docker run -d --name nginx-lb --network app-network -p 80:80 nginx'
+        sh 'sleep 2'
+        sh 'docker cp default.conf nginx-lb:/etc/nginx/conf.d/default.conf'
+        sh 'docker exec nginx-lb nginx -s reload'
     }
+}
     post {
         success {
             echo 'Pipeline executed successfully. NGINX load balancer is running.'
