@@ -19,23 +19,24 @@ pipeline {
                 '''
             }
         }
-stage('Deploy NGINX Load Balancer') {
-    steps {
-        sh '''
-        docker rm -f nginx-lb || true
-        docker run -d \
-          --name nginx-lb \
-          --network app-network \
-          -p 80:80 \
-          -v $(pwd)/default.conf:/etc/nginx/conf.d/default.conf \
-          nginx
-        '''
+        stage('Deploy NGINX Load Balancer') {
+            steps {
+                sh '''
+                docker rm -f nginx-lb || true
+                docker run -d --name nginx-lb --network app-network -p 80:80 -v $(pwd)/default.conf:/etc/nginx/conf.d/default.conf nginx
+                '''
+            }
+        }
     }
-}
     post {
         success {
             echo 'Pipeline executed successfully. NGINX load balancer is running.'
         }
+        failure {
+            echo 'Pipeline failed. Check console logs for errors.'
+        }
+    }
+}
         failure {
             echo 'Pipeline failed. Check console logs for errors.'
         }
